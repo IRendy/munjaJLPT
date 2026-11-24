@@ -20,6 +20,37 @@ cargo build --release
 
 数据默认在 `exam/` 目录（N1–N5），源码在 `src/`，两者分离。
 
+## 试题数据
+
+`exam/` 目录**不随仓库上传**（已在 `.gitignore` 中忽略），试题数据需自行下载。
+
+**下载地址**：
+
+> https://mega.nz/file/Pp4hDaKb#iV2bp99KELdjfUEpUXMfgYkjMBljrzq64ZcjaX2YU88
+
+**数据来源**：[5mdld/anki-jlpt-decks](https://github.com/5mdld/anki-jlpt-decks)
+
+**许可证**：[Attribution-NonCommercial 4.0 International（CC BY-NC 4.0）](https://creativecommons.org/licenses/by-nc/4.0/)——仅限非商业用途，使用请保留署名。
+
+**放置方法**：
+
+1. 下载压缩包并解压；
+2. 在项目根目录建 `exam/` 目录，把解压出的 **N1–N5** 放进去；
+3. 解压后的目录结构应如下（每个级别一个目录，每张试卷一个子目录，内含 JSON、`audio/`、`images/`）：
+
+```text
+munjaJLPT/
+├── exam/
+│   ├── N1/  N2/  N3/  N4/  N5/
+│   │   └── 2010-07_N3/
+│   │       ├── 2010-07_N3.json
+│   │       ├── audio/   images/
+│   │       └── …
+├── src/  fonts/  …
+```
+
+放好后即可运行 `munja` 生成 HTML / Markdown / PDF。
+
 ## 用法
 
 ```text
