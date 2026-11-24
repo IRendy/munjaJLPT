@@ -1,0 +1,35 @@
+# 推送到 GitHub 后，在三个平台上原生构建发布版并打包产物。
+name: Build
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Build release
+        run: cargo build --release
+
+      - name: Rename artifact (unix)
+        if: runner.os != 'Windows'
+        run: cp target/release/munja target/release/munja-${{ matrix.os }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: munja-${{ matrix.os }}
+          path: |
+            target/release/munja.exe
+            target/release/munja-${{ matrix.os }}
+          if-no-files-found: ignore
