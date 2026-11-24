@@ -154,8 +154,7 @@ munjaJLPT/
 │   │       ├── audio/  images/
 ├── fonts/                # 打包字体（供 HTML/PDF 引用）
 ├── src/                  # Rust 源码
-├── Cargo.toml
-└── build-windows.sh
+└── Cargo.toml
 ```
 
 ## 输出
