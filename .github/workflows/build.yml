@@ -1,8 +1,12 @@
-# 推送到 GitHub 后，在三个平台上原生构建发布版并打包产物。
+# 在三个平台原生构建发布版并打包产物。
+# - push 到 main：构建三个平台，作为 CI 验证
+# - push tag v*：构建并创建 GitHub Release，附带三平台产物
+# - 手动 workflow_dispatch：随时触发构建
 name: Build
 
 on:
   push:
+    branches: [main]
     tags: ["v*"]
   workflow_dispatch:
 
@@ -21,15 +25,48 @@ jobs:
       - name: Build release
         run: cargo build --release
 
-      - name: Rename artifact (unix)
-        if: runner.os != 'Windows'
-        run: cp target/release/munja target/release/munja-${{ matrix.os }}
+      # 产物文件名：Windows 是 munja.exe，其它平台是 munja
+      - name: Set asset name
+        id: vars
+        shell: bash
+        run: |
+          case "${{ matrix.os }}" in
+            ubuntu-latest)  echo "asset=munja-linux" >> "$GITHUB_OUTPUT" ;;
+            windows-latest) echo "asset=munja-windows.exe" >> "$GITHUB_OUTPUT" ;;
+            macos-latest)   echo "asset=munja-macos" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - name: Prepare artifact
+        shell: bash
+        run: |
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            cp target/release/munja.exe "${{ steps.vars.outputs.asset }}"
+          else
+            cp target/release/munja "${{ steps.vars.outputs.asset }}"
+          fi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: munja-${{ matrix.os }}
-          path: |
-            target/release/munja.exe
-            target/release/munja-${{ matrix.os }}
-          if-no-files-found: ignore
+          name: ${{ steps.vars.outputs.asset }}
+          path: ${{ steps.vars.outputs.asset }}
+
+  # 打 tag（v*）时，把三个平台的产物发布到 GitHub Release
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            munja-linux
+            munja-windows.exe
+            munja-macos
+          generate_release_notes: true
