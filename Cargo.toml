@@ -1,6 +1,6 @@
 [package]
 name = "munja"
-version = "0.2.0"
+version = "0.0.1"
 edition = "2021"
 description = "整理 JLPT（日语能力考试）试题：JSON → HTML / Markdown / PDF（无头浏览器打印）"
 license = "MIT"
